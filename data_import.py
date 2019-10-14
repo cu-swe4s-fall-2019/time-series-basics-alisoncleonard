@@ -39,17 +39,6 @@ class ImportData:
     def linear_search_value(self, key_time):
         # return list of value(s) associated with key_time
         # if none, return -1 and error message
-        # value_list = []
-        # indices = [i for i, curr in enumerate(self._roundtimeStr) if curr == key_time]
-        # print('len _roundtimeStr: ' +str(len(self._roundtimeStr)))
-        # print('len _value' + str(len(self._value)))
-        # print(indices)
-        # if indices == []:
-        #     print('invalid time')
-        #     return -1
-        # for n in indices:
-        #     value_list.append(self._value[n])
-        # return value_list
 
         hit = []
         for i in range(len(self._roundtimeStr)):
@@ -121,11 +110,13 @@ class ImportData:
 def printArray(data_list, annotation_list, base_name, key_file):
     # combine and print on the key_file
     # find index with data you want
+    # data list is a list of zip objects
+
     base_data = []
     key_idx = 0
     for i in range(len(annotation_list)):
         if annotation_list[i] == key_file:
-            base_data = zip(data_list[i]._roundtimeStr, data_list[i]._value)
+            base_data = data_list[i]
             print('base data is: ' + annotation_list[i])
             key_idx = i
             break
@@ -144,20 +135,34 @@ def printArray(data_list, annotation_list, base_name, key_file):
         file.write(annotation_list[idx][0:-4]+', ')
     file.write('\n')
 
+    # need to pull data from the values portion of each zip object, for each time
 
     for time, value in base_data:
-        file.write(time+', '+value+', ')
+        file.write(str(time)+', '+str(value)+', ')
         for n in non_key:
-            if time in data_list[n]._roundtimeStr:
-                file.write(str(data_list[n].linear_search_value(time))+', ')
+            if time in data_list[n].time:
+                file.write(str(data_list[n].value+', '))
             else:
                 file.write('0, ')
         file.write('\n')
     file.close()
 
+    # for time, value in base_data:
+    #     file.write(str(time)+', '+str(value)+', ')
+    #     for n in non_key:
+    #         if time in data_list[n]
+    #             file.write(str(data_list[n].linear_search_value(time))+', ')
+    #         else:
+    #             file.write('0, ')
+    #     file.write('\n')
+    # file.close()
+
 
 
 def main():
+
+    #python data_import.py './smallData/' 'combined_timeseries' 'cgm_small.csv'
+
 
     #adding arguments
     parser = argparse.ArgumentParser(description= 'A class to import, combine, and print data from a folder.',
@@ -165,12 +170,12 @@ def main():
 
     parser.add_argument('folder_name', type = str, help = 'Name of the folder')
 
-    # parser.add_argument('output_file', type=str, help = 'Name of Output file')
-    #
-    # parser.add_argument('sort_key', type = str, help = 'File to sort on')
-    #
-    # parser.add_argument('--number_of_files', type = int,
-    # help = "Number of Files", required = False)
+    parser.add_argument('output_file', type=str, help = 'Name of Output file')
+
+    parser.add_argument('sort_key', type = str, help = 'File to sort on')
+
+    parser.add_argument('--number_of_files', type = int,
+    help = "Number of Files", required = False)
 
     args = parser.parse_args()
 
@@ -189,16 +194,15 @@ def main():
     data_5 = [] # a list with time rounded to 5min
     data_15 = [] # a list with time rounded to 15min
 
-
     for file, object in zip(files_lst, data_lst):
         data_5.append(object.roundTime(5, file))
 
     for file, object in zip(files_lst, data_lst):
-        data_5.append(object.roundTime(15, file))
+        data_15.append(object.roundTime(15, file))
 
     #print to a csv file
-    #printArray(data_5,files_lst,args.output_file+'_5',args.sort_key)
-    #printArray(data_15, files_lst,args.output_file+'_15',args.sort_key)
+    printArray(data_5,files_lst,args.output_file+'_5',args.sort_key)
+    # printArray(data_15, files_lst,args.output_file+'_15',args.sort_key)
 
 if __name__ == '__main__':
     main()
