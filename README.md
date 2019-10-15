@@ -60,6 +60,8 @@ $ conda install --yes python=3.6
 $ conda install -y pycodestyle
 
 $ conda install -y python-dateutil
+
+$ conda install -y numpy
 ```
 
 4. Access software on [GitHub]
