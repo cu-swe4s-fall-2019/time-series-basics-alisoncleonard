@@ -8,9 +8,10 @@ before_install:
     - conda config --add channels r
     - conda create --yes -n test
     - conda activate test
+    - conda install --yes python=3.6
     - conda install -y pycodestyle
     - conda install -y python-dateutil
-    - conda install --yes python=3.6
+    - conda install -y numpy
 
 script:
     - python data_import.py './smallData/' 'combined_timeseries' 'cgm_small.csv'
