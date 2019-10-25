@@ -12,6 +12,7 @@ import datetime
 import sys
 import numpy as np
 from statistics import mean
+import math
 
 
 class ImportData:
@@ -34,7 +35,7 @@ class ImportData:
         Returns
         -------
         self._time - a list of all times read from the file
-        self._value - a parallel list of al values for each time in self._time
+        self._value - a parallel list of all values for each time in self._time
         """
         self._time = []
         self._value = []
@@ -74,7 +75,7 @@ class ImportData:
         hit = []
         for i in range(len(self._roundtimeStr)):
             if key_time == self._roundtimeStr[i]:
-                hit.append(i)
+                hit.append(self._value[i])
         return hit
 
     def roundTime(self, res, filename):
@@ -94,16 +95,6 @@ class ImportData:
         -------
         A zip object of time, value data from that ImportData object
         """
-        # Inputs: obj (ImportData Object) and res (rounding resoultion)
-        # objective:
-        # create a list of datetime entries and associated values
-        # with the times rounded to the nearest rounding resolution (res)
-        # ensure no duplicated times
-        # handle duplicated values for a single timestamp based on instructions
-        # in the assignment
-        # return: iterable zip object of the two lists
-        # note: you can create additional variables to help with this task
-        # which are not returned
 
         for times in self._time:
             minminus = datetime.timedelta(minutes=(times.minute % res))
@@ -114,6 +105,7 @@ class ImportData:
                 newtime = times + minplus
             self._roundtime.append(newtime)
             self._roundtimeStr.append(newtime.strftime("%m/%d/%Y %H:%M"))
+
         # find unique times in list
         x = np.array(self._roundtimeStr)
         unique_times = np.unique(x)
@@ -122,31 +114,29 @@ class ImportData:
         for t in unique_times:
             statement = "Non-integers, can't sum. Check " + str(filename)
             sum = ['activity_small.csv', 'bolus_small.csv', 'meal_small.csv']
-            avg = ['smbg_small.csv', 'hr_small.csv', 'cgm_small.csv']
-            if filename in sum:
-                # alert user if non-integer data, removes from any calculations
+            test_sum = ['test_one.csv']
+            # alert user if non-integer data, removes from any calculations
+            if filename in sum or test_sum:
                 try:
                     int_list = [int(i) for i in self.linear_search_value(t)]
-                    values.append(sum(int_list))
+                    values.append(int(math.fsum(int_list)))
                 except ValueError:
                     print(statement)
                     values.append(statement)
-            if filename in avg:
+                except IndexError:  # no value listed for that time
+                    continue
+            else:
                 try:
                     int_list = [int(i) for i in self.linear_search_value(t)]
                     values.append(mean(int_list))
                 except ValueError:
                     print(statement)
                     values.append(statement)
-            else:
-                try:
-                    int_list = [int(i) for i in self.linear_search_value(t)]
-                    values.append(int_list)
-                except ValueError:
-                    print(statement)
-                    values.append(statement)
-
-        return zip(unique_times, values)
+                except IndexError:
+                    continue
+        # wrap zip object in list so that we can iterate through zip objects
+        # multiple times
+        return list(zip(unique_times, values))
 
 
 def printArray(data_list, annotation_list, base_name, key_file):
@@ -185,7 +175,9 @@ def printArray(data_list, annotation_list, base_name, key_file):
 
     file.write(annotation_list[key_idx][0:-4]+', ')
 
+    # non-key is a list of the indices of objects in data_list
     non_key = list(range(len(annotation_list)))
+    # remove the index of key file so you don't print that data twice
     non_key.remove(key_idx)
 
     for idx in non_key:
@@ -197,9 +189,14 @@ def printArray(data_list, annotation_list, base_name, key_file):
     for time, value in base_data:
         file.write(str(time)+', '+str(value)+', ')
         for n in non_key:
-            if time in data_list[n].time:
-                file.write(str(data_list[n].value+', '))
-            else:
+            n_data = data_list[n]
+            found = False
+            for ntime, nvalue in n_data:
+                if str(ntime) == str(time):
+                    file.write(str(nvalue)+', ')
+                    found = True
+                    continue
+            if found is False:
                 file.write('0, ')
         file.write('\n')
     file.close()
@@ -243,19 +240,24 @@ def main():
     files_lst = [f for f in listdir(folder) if isfile(join(folder, f))]
 
     # import all the files into a list of ImportData objects (in a loop!)
-    data_lst = []
+    # made two lists because was overwriting _roundTimeStr
+    data_lst_1 = []
     for files in files_lst:
-        data_lst.append(ImportData(folder+files))
+        data_lst_1.append(ImportData(folder+files))
+
+    data_lst_2 = []
+    for files in files_lst:
+        data_lst_2.append(ImportData(folder+files))
 
     # create two new lists of zip objects
     # do this in a loop, where you loop through the data_lst
     data_5 = []  # a list with time rounded to 5min
     data_15 = []  # a list with time rounded to 15min
 
-    for file, object in zip(files_lst, data_lst):
+    for file, object in zip(files_lst, data_lst_1):
         data_5.append(object.roundTime(5, file))
 
-    for file, object in zip(files_lst, data_lst):
+    for file, object in zip(files_lst, data_lst_2):
         data_15.append(object.roundTime(15, file))
 
     # print to a csv file
