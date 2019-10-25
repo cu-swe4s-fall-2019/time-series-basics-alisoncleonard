@@ -11,9 +11,10 @@ and prints a combined csv file with all the data.
 Required modules:
 1. data_import.py: main script to import and clean data
 2. unittests_data_import.py: unit testing file for data_import.py
-3. smallData: folder containing csv files of time series data
-4. README.md
-5. .travis.yml
+3. timeseries_function_tests.py: functional test file using ssshtest framework. Tests that correct output is given when running python data_import.py './smallData/' 'combined_timeseries' 'cgm_small.csv'
+4. smallData: folder containing csv files of time series data
+5. README.md
+6. .travis.yml
 
 ## Description of functions
 
