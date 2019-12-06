@@ -12,10 +12,8 @@ before_install:
     - conda install -y pycodestyle
     - conda install -y python-dateutil
     - conda install -y numpy
-    - conda install -y pandas
 
 script:
     - python data_import.py './smallData/' 'combined_timeseries' 'cgm_small.csv'
     - python unittests_data_import.py
     - bash timeseries_function_tests.sh
-    - python pandas_import.py
