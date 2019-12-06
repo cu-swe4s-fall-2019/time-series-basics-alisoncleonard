@@ -67,3 +67,16 @@ $ conda install -y numpy
 
 4. Access software on [GitHub]
 (https://github.com/cu-swe4s-fall-2019/time-series-basics-alisoncleonard)
+
+# Homework 11 - Pandas
+
+The file pandas_import.py uses Pandas package to easily clean and align the
+data files on the timestamp, round by 5 minute and 15 minute intervals, either
+add or average the values for a column with the same rounded timestamp, and
+export the dataframes csv files.
+
+## Benchmarking data_import.py vs pandas_import.py
+
+Time to run programs:
+data_import.py - 33.05 seconds, 66020 KB memory
+pandas_import.py - 11.23 seconds, 77208 KB memory
